@@ -1,104 +1,132 @@
-const WebSocket = require('ws'); // 导入WebSocket库
-const axios = require('axios'); // 导入axios库
-const { v4: generateUUID } = require('uuid'); // 导入UUID生成器
-const { SocksProxyAgent } = require('socks-proxy-agent'); // 导入Socks代理类
-const { HttpsProxyAgent } = require('https-proxy-agent'); // 导入HTTPS代理类
-require('colors'); // 导入颜色模块
+require('colors');
+const WebSocket = require('ws');
+const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
+const { SocksProxyAgent } = require('socks-proxy-agent');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
-class ProxyBot {
-  constructor(settings) {
-    this.settings = settings; // 保存配置
+class Bot {
+  constructor(config) {
+    this.config = config;
   }
 
-  async fetchProxyDetails(proxy) {
-    const agent = proxy.startsWith('http') ? new HttpsProxyAgent(proxy) : new SocksProxyAgent(proxy); // 创建代理
+  async getProxyIP(proxy) {
+    const agent = proxy.startsWith('http')
+      ? new HttpsProxyAgent(proxy)
+      : new SocksProxyAgent(proxy);
     try {
-      const response = await axios.get(this.settings.ipCheckURL, { httpsAgent: agent });
-      console.log(`成功通过代理 ${proxy} 连接`.green);
-      return response.data; // 返回代理信息
-    } catch (err) {
-      console.error(`连接代理 ${proxy} 失败: ${err.message}`.yellow);
-      return null; // 返回null
+      const response = await axios.get(this.config.ipCheckURL, {
+        httpsAgent: agent,
+      });
+      console.log(`通过代理 ${proxy} 连接成功`.green);
+      return response.data;
+    } catch (error) {
+      console.error(
+        `跳过代理 ${proxy}，连接错误: ${error.message}`.yellow
+      );
+      return null;
     }
   }
 
-  async establishConnection(proxy, userID) {
-    const formattedProxy = proxy.startsWith('socks5://') ? proxy : `socks5://${proxy}`; // 格式化代理
-    const proxyDetails = await this.fetchProxyDetails(formattedProxy); // 获取代理信息
+  async connectToProxy(proxy, userID) {
+    const formattedProxy = proxy.startsWith('socks5://')
+      ? proxy
+      : proxy.startsWith('http')
+      ? proxy
+      : `socks5://${proxy}`;
+    const proxyInfo = await this.getProxyIP(formattedProxy);
 
-    if (!proxyDetails) return; // 如果没有获取到代理信息，返回
+    if (!proxyInfo) {
+      return;
+    }
 
     try {
-      const agent = formattedProxy.startsWith('http') ? new HttpsProxyAgent(formattedProxy) : new SocksProxyAgent(formattedProxy);
-      const wsEndpoint = `wss://${this.settings.wssHost}`; // WebSocket地址
-      const websocket = new WebSocket(wsEndpoint, {
+      const agent = formattedProxy.startsWith('http')
+        ? new HttpsProxyAgent(formattedProxy)
+        : new SocksProxyAgent(formattedProxy);
+      const wsURL = `wss://${this.config.wssHost}`;
+      const ws = new WebSocket(wsURL, {
         agent,
         headers: {
           'User-Agent': 'Mozilla/5.0',
           pragma: 'no-cache',
-          Origin: 'chrome-extension://your-extension-id',
-          'Accept-Language': 'en-US,en;q=0.9',
+          Origin: 'chrome-extension://lkbnfiajjmbhnfledhphioinpickokdi',
+          'Accept-Language': 'uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7',
           'Cache-Control': 'no-cache',
         },
       });
 
-      websocket.on('open', () => {
-        console.log(`已连接到 ${proxy}`.cyan);
-        console.log(`代理信息: ${JSON.stringify(proxyDetails)}`.magenta);
-        this.pingServer(websocket, proxyDetails.ip); // 发送ping
+      ws.on('open', () => {
+        console.log(`连接到 ${proxy}`.cyan);
+        console.log(`代理 IP 信息: ${JSON.stringify(proxyInfo)}`.magenta);
+        this.sendPing(ws, proxyInfo.ip);
       });
 
-      websocket.on('message', (data) => {
-        const message = JSON.parse(data);
-        console.log(`收到消息: ${JSON.stringify(message)}`.blue);
+      ws.on('message', (message) => {
+        const msg = JSON.parse(message);
+        console.log(`收到消息: ${JSON.stringify(msg)}`.blue);
 
-        if (message.action === 'AUTH') {
-          const responseAuth = {
-            id: message.id,
+        if (msg.action === 'AUTH') {
+          const authResponse = {
+            id: msg.id,
             origin_action: 'AUTH',
             result: {
-              browser_id: generateUUID(),
+              browser_id: uuidv4(),
               user_id: userID,
               user_agent: 'Mozilla/5.0',
               timestamp: Math.floor(Date.now() / 1000),
               device_type: 'extension',
-              extension_id: 'your-extension-id',
+              extension_id: 'lkbnfiajjmbhnfledhphioinpickokdi',
               version: '4.26.2',
             },
           };
-          websocket.send(JSON.stringify(responseAuth)); // 发送认证响应
-          console.log(`已发送认证响应: ${JSON.stringify(responseAuth)}`.green);
-        } else if (message.action === 'PONG') {
-          console.log(`收到PONG: ${JSON.stringify(message)}`.blue);
+          ws.send(JSON.stringify(authResponse));
+          console.log(
+            `发送授权响应: ${JSON.stringify(authResponse)}`.green
+          );
+        } else if (msg.action === 'PONG') {
+          console.log(`收到 PONG: ${JSON.stringify(msg)}`.blue);
         }
       });
 
-      websocket.on('close', (code, reason) => {
-        console.log(`WebSocket关闭，代码: ${code}, 原因: ${reason}`.yellow);
-        setTimeout(() => this.establishConnection(proxy, userID), this.settings.retryInterval);
+      ws.on('close', (code, reason) => {
+        console.log(
+          `WebSocket 关闭，代码: ${code}, 原因: ${reason}`.yellow
+        );
+        setTimeout(
+          () => this.connectToProxy(proxy, userID),
+          this.config.retryInterval
+        );
       });
 
-      websocket.on('error', (err) => {
-        console.error(`WebSocket连接错误: ${err.message}`.red);
-        websocket.terminate(); // 终止连接
+      ws.on('error', (error) => {
+        console.error(
+          `代理 ${proxy} 的 WebSocket 错误: ${error.message}`.red
+        );
+        ws.terminate();
       });
-    } catch (err) {
-      console.error(`无法连接到代理 ${proxy}: ${err.message}`.red);
+    } catch (error) {
+      console.error(
+        `与代理 ${proxy} 连接失败: ${error.message}`.red
+      );
     }
   }
 
-  pingServer(ws, proxyIP) {
+  sendPing(ws, proxyIP) {
     setInterval(() => {
-      const pingPayload = {
-        id: generateUUID(),
+      const pingMessage = {
+        id: uuidv4(),
         version: '1.0.0',
         action: 'PING',
         data: {},
       };
-      ws.send(JSON.stringify(pingPayload)); // 发送ping消息
-      console.log(`已发送ping - IP: ${proxyIP}, 消息: ${JSON.stringify(pingPayload)}`.cyan);
-    }, 26000); // 每26秒发送一次
+      ws.send(JSON.stringify(pingMessage));
+      console.log(
+        `发送 ping - IP: ${proxyIP}, 消息: ${JSON.stringify(pingMessage)}`
+          .cyan
+      );
+    }, 26000);
   }
 }
 
-module.exports = ProxyBot; // 导出ProxyBot类
+module.exports = Bot;
