@@ -1,37 +1,60 @@
-# getgrass-bot
-此仓库包含 getgrass-bot 的代码，这是一个旨在通过各种 HTTP 代理执行 WebSocket 连接的机器人。
+ # @GetGrass-Bot
+欢迎来到 GetGrass-Bot 项目！这是一个专为草地空投第二季设计的机器人，能够通过各种 HTTP 和 SOCKS 代理建立 WebSocket 连接，助你在空投中高效耕作。
 
-## 概述
-getgrass-bot 通过 HTTP 代理与指定的 WebSocket 服务器建立连接。它使用 websockets 库进行 WebSocket 通信，并支持通过 HTTP 代理进行连接。
+## 项目概述
+GetGrass-Bot 通过 HTTP 和 SOCKS 代理与指定的 WebSocket 服务器进行连接。我们使用 ws 库处理 WebSocket 通信，同时结合 https-proxy-agent 和 socks-proxy-agent 库，以支持多种代理类型，从而实现更灵活和稳定的连接。
 
-## 安装
-将此仓库克隆到本地计算机。
-进入项目目录。
-安装依赖项：
-bash
-复制代码
-pip install -r requirements.txt
-## 使用
-打开 config.py 文件，使用文本编辑器进行编辑。
+## 安装步骤
+将此仓库克隆到你的本地环境：
 
-获取你的用户 ID：
+ ```bash
+git clone https://github.com/dante4rt/getgrass-bot.git
+进入项目目录：
+ ```
+ ```bash
+cd getgrass-bot
+ ```
+## 安装所需依赖项：
+ ```bash
+npm install
+ ```
 
-登录到 Getgrass 网站，访问 https://app.getgrass.io/dashboard。
-在账户设置或个人资料页面中查找用户 ID。
-复制该用户 ID。
-修改 config.py 文件中的 用户_ID 变量，将其替换为你的用户 ID。
+## 使用说明
+获取用户 ID：
 
-更新 HTTP_PROXY_LIST 数组，添加所需的 HTTP 代理 URL。确保每个 URL 的格式为 http://用户名:密码@主机名:端口。
+登录到 GetGrass 网站。
 
-保存对 config.py 的更改。
+打开浏览器开发者工具（通常按 F12 或右键选择“检查”）。
 
-运行 getgrass-bot，执行以下命令：
+切换到“控制台”选项卡。
 
-bash
-复制代码
-python main.py
-## 配置
-在 config.py 文件中：
+输入以下命令并按回车：
 
-修改 用户_ID 变量为你的用户 ID。
-更新 HTTP_PROXY_LIST 数组，添加所需的 HTTP 代理 URLs。确保每个 URL 的格式为 http://用户名:密码@主机名:端口。
+```bash
+localStorage.getItem('userId');
+ ```
+复制返回的值，这就是你的用户 ID。
+
+创建用户 ID 文件：
+
+在项目目录中创建一个名为 uid.txt 的文件，每行写一个用户 ID，例如：
+
+```bash
+123123213
+12313123
+```
+添加代理信息：
+
+创建一个名为 proxy.txt 的文件，并按行添加你的代理 URL，格式如下：
+```bash
+
+http://username:password@hostname:port
+socks5://username:password@hostname:port
+```
+启动机器人：
+
+在终端中执行以下命令运行 GetGrass-Bot：
+```bash
+npm start
+
+```
