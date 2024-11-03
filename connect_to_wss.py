@@ -1,19 +1,23 @@
-# 处理 WebSocket 连接的逻辑
-
 import asyncio
 import websockets
 import uuid
 import logging
-from config import 用户_ID, HTTP_PROXY_LIST
+from config import 用户_ID, HTTP_PROXY_LIST, USE_PROXY
 
 logger = logging.getLogger(__name__)
 
-async def 连接到_wss(http_proxy):
+async def 连接到_wss(http_proxy=None):
     uri = 'wss://proxy.wynd.network:4650/'
 
     while True:
         try:
-            async with websockets.connect(uri, proxy=http_proxy) as websocket:
+            # 判断是否使用代理
+            connection_params = {"uri": uri}
+            if USE_PROXY and http_proxy:
+                connection_params["proxy"] = http_proxy
+
+            # 根据是否使用代理来建立连接
+            async with websockets.connect(**connection_params) as websocket:
                 logger.info('WebSocket 连接已打开')
 
                 async def 发送_ping():
