@@ -1,8 +1,9 @@
-const ProxyBot = require('./src/ProxyBot'); // 导入ProxyBot类
-const Configuration = require('./src/Configuration'); // 导入Configuration类
-const { retrieveProxies, loadLines, chooseProxySource } = require('./src/proxyManager'); // 导入代理管理函数
+const ProxyBot = require('./src/Bot'); // 导入ProxyBot类
+const Configuration = require('./src/Config'); // 导入Configuration类
+const { retrieveProxies, loadLines, chooseProxySource } = require('./src/ProxyManager'); // 导入代理管理函数
 const { delayFunction } = require('./src/utils'); // 导入延迟函数
 const inquirer = require('inquirer'); // 导入inquirer库
+require('colors'); // 导入颜色模块
 
 function showHeader() {
   process.stdout.write('\x1Bc'); // 清屏
@@ -46,7 +47,12 @@ async function main() {
   console.log(`加载了 ${userIDs.length} 个用户ID\n`.green);
 
   for (const userID of userIDs) {
-    proxies.forEach((proxy) => bot.establishConnection(proxy, userID)); // 连接每个代理
+    for (const proxy of proxies) {
+      await bot.establishConnection(proxy, userID); // 连接每个代理
+    }
   }
 }
 
+main().catch((err) => {
+  console.error(`出现错误: ${err.message}`.red);
+});
