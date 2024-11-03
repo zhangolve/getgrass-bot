@@ -1,9 +1,10 @@
-class Config { // 配置类
-  constructor() { // 构造函数
+class Configuration {
+  constructor() {
     this.ipCheckURL = 'https://ipinfo.io/json'; // IP检查URL
-    this.wssHost = 'proxy.wynd.network:4444'; // WebSocket服务器地址
+    this.wssHost = 'proxy.your-domain.com:4444'; // WebSocket服务器地址
     this.retryInterval = 20000; // 重试间隔（20秒）
   }
 }
 
-module.exports = Config; // 导出Config类
+module.exports = Configuration; // 导出Configuration类
+
