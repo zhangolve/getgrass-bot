@@ -1,8 +1,9 @@
  # @GetGrass-Bot
-欢迎来到 GetGrass-Bot 项目！这是一个专为草地空投第二季设计的机器人，能够通过各种 HTTP 和 SOCKS 代理建立 WebSocket 连接，助你在空投中高效耕作。
+这是一个专为小草空投第二季设计的机器人
 
-## 项目概述
-GetGrass-Bot 通过 HTTP 和 SOCKS 代理与指定的 WebSocket 服务器进行连接。我们使用 ws 库处理 WebSocket 通信，同时结合 https-proxy-agent 和 socks-proxy-agent 库，以支持多种代理类型，从而实现更灵活和稳定的连接。
+## 功能
+✅ 支持多个 UID
+✅ 支持自定义代理
 
 ## 安装步骤
 将此仓库克隆到你的本地环境：
