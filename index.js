@@ -1,56 +1,52 @@
-require('./src/Bot'); // 导入Bot类
-const Config = require('./src/Config'); // 导入Config类
-const {
-  fetchProxies,
-  readLines,
-  selectProxySource,
-} = require('./src/ProxyManager'); // 导入代理管理器函数
-const { delay } = require('./src/utils'); // 导入延迟函数
+const ProxyBot = require('./src/ProxyBot'); // 导入ProxyBot类
+const Configuration = require('./src/Configuration'); // 导入Configuration类
+const { retrieveProxies, loadLines, chooseProxySource } = require('./src/proxyManager'); // 导入代理管理函数
+const { delayFunction } = require('./src/utils'); // 导入延迟函数
+const inquirer = require('inquirer'); // 导入inquirer库
 
-function displayHeader() { // 显示头部信息的函数
+function showHeader() {
   process.stdout.write('\x1Bc'); // 清屏
   console.log('========================================'.cyan);
-  console.log('=        小草第二季 - V2        ='.cyan);
+  console.log('=        Proxy Bot V2          ='.cyan);
   console.log('========================================'.cyan);
   console.log();
 }
 
-async function main() { // 主函数
-  displayHeader(); // 显示头部信息
+async function main() {
+  showHeader(); // 显示头部信息
   console.log(`请稍候...\n`.yellow);
 
-  await delay(1000); // 延迟1秒
+  await delayFunction(1000); // 延迟1秒
 
-  const config = new Config(); // 创建配置实例
-  const bot = new Bot(config); // 创建Bot实例
+  const config = new Configuration(); // 创建配置实例
+  const bot = new ProxyBot(config); // 创建Bot实例
 
-  const proxySource = await selectProxySource(inquirer); // 选择代理来源
+  const proxySource = await chooseProxySource(inquirer); // 选择代理来源
 
-  let proxies; // 代理变量
-  if (proxySource.type === 'file') { // 如果是文件来源
-    proxies = await readLines(proxySource.source); // 读取代理文件
-  } else { // 否则为URL来源
-    proxies = await fetchProxies(proxySource.source); // 获取代理
+  let proxies;
+  if (proxySource.type === 'file') {
+    proxies = await loadLines(proxySource.source); // 从文件读取代理
+  } else {
+    proxies = await retrieveProxies(proxySource.source); // 从URL获取代理
   }
 
-  if (proxies.length === 0) { // 如果没有代理
-    console.error('未找到代理，退出...'.red); // 输出错误信息
+  if (proxies.length === 0) {
+    console.error('未找到代理，退出...'.red);
     return; // 退出
   }
 
-  console.log(`加载了 ${proxies.length} 个代理`.green); // 输出加载的代理数量
+  console.log(`加载了 ${proxies.length} 个代理`.green);
 
-  const userIDs = await readLines('uid.txt'); // 读取用户ID文件
-  if (userIDs.length === 0) { // 如果没有用户ID
-    console.error('uid.txt中未找到用户ID，退出...'.red); // 输出错误信息
+  const userIDs = await loadLines('uid.txt'); // 读取用户ID文件
+  if (userIDs.length === 0) {
+    console.error('未找到用户ID，退出...'.red);
     return; // 退出
   }
 
-  console.log(`加载了 ${userIDs.length} 个用户ID\n`.green); // 输出加载的用户ID数量
+  console.log(`加载了 ${userIDs.length} 个用户ID\n`.green);
 
-  for (const userID of userIDs) { // 遍历用户ID
-    proxies.forEach((proxy) => bot.connectToProxy(proxy, userID)); // 连接每个代理
+  for (const userID of userIDs) {
+    proxies.forEach((proxy) => bot.establishConnection(proxy, userID)); // 连接每个代理
   }
 }
 
-main().catch(console.error); // 执行主函数并捕获错误
