@@ -1,5 +1,5 @@
 {
-  "name": "getgrass-bot",
+  "name": "小草机器人",
   "version": "2.0.0",
   "description": "一个通过各种HTTP和SOCKS代理建立WebSocket连接的机器人，专门用于耕作Grass Airdrop第2季。",
   "main": "index.js",
@@ -17,7 +17,7 @@
     "airdrops",
     "farming"
   ],
-  "author": "dante4rt",
+  "author": "子清",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.7.7",
