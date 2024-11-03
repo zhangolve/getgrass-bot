@@ -8,7 +8,7 @@ GetGrass-Bot 通过 HTTP 和 SOCKS 代理与指定的 WebSocket 服务器进行�
 将此仓库克隆到你的本地环境：
 
  ```bash
-git clone https://github.com/dante4rt/getgrass-bot.git
+git clone https://github.com/ziqing888/getgrass-bot.git
 进入项目目录：
  ```
  ```bash
