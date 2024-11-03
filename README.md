@@ -26,7 +26,7 @@ npm install
 ## 使用说明
 获取用户 ID：
 
-登录到 GetGrass 网站。
+登录到 GetGrass 网站: https://app.getgrass.io/dashboard
 
 打开浏览器开发者工具（通常按 F12 或右键选择“检查”）。
 
