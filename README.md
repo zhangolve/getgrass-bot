@@ -9,8 +9,9 @@ GetGrass-Bot 通过 HTTP 和 SOCKS 代理与指定的 WebSocket 服务器进行�
 
  ```bash
 git clone https://github.com/ziqing888/getgrass-bot.git
-进入项目目录：
+
  ```
+进入项目目录：
  ```bash
 cd getgrass-bot
  ```
