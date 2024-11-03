@@ -1,60 +1,81 @@
-const axios = require('axios'); // 导入axios库
-const fs = require('fs'); // 导入文件系统模块
-require('colors'); // 导入颜色模块
+require('colors');
+const axios = require('axios');
+const fs = require('fs');
 
 const PROXY_SOURCES = {
-  'SOURCE 1': 'https://example.com/proxies1.txt',
-  'SOURCE 2': 'https://example.com/proxies2.txt',
-  // 其他源...
+  'SERVER 1': 'https://files.ramanode.top/airdrop/grass/server_1.txt',
+  'SERVER 2': 'https://files.ramanode.top/airdrop/grass/server_2.txt',
+  'SERVER 3': 'https://files.ramanode.top/airdrop/grass/server_3.txt',
+  'SERVER 4': 'https://files.ramanode.top/airdrop/grass/server_4.txt',
+  'SERVER 5': 'https://files.ramanode.top/airdrop/grass/server_5.txt',
+  'SERVER 6': 'https://files.ramanode.top/airdrop/grass/server_6.txt',
 };
 
-async function retrieveProxies(sourceURL) {
+async function fetchProxies(url) {
   try {
-    const response = await axios.get(sourceURL);
-    console.log(`成功从 ${sourceURL} 获取代理`.green);
+    const response = await axios.get(url);
+    console.log(`从 ${url} 获取代理成功`.green);
     return response.data.split('\n').filter(Boolean);
-  } catch (err) {
-    console.error(`获取代理失败: ${err.message}`.red);
+  } catch (error) {
+    console.error(`从 ${url} 获取代理失败: ${error.message}`.red);
     return [];
   }
 }
 
-async function loadLines(filePath) {
+async function readLines(filename) {
   try {
-    const data = await fs.promises.readFile(filePath, 'utf-8');
-    console.log(`成功加载 ${filePath}`.green);
+    const data = await fs.promises.readFile(filename, 'utf-8');
+    console.log(`从 ${filename} 加载数据成功`.green);
     return data.split('\n').filter(Boolean);
-  } catch (err) {
-    console.error(`读取文件 ${filePath} 失败: ${err.message}`.red);
+  } catch (error) {
+    console.error(`读取文件 ${filename} 失败: ${error.message}`.red);
     return [];
   }
 }
 
-async function chooseProxySource(inquirer) {
-  const choices = [...Object.keys(PROXY_SOURCES), '自定义']; // 代理来源选项
-  const { source } = await inquirer.prompt([
+async function selectProxySource(inquirer) {
+  const questions = [
     {
       type: 'list',
-      name: 'source',
-      message: '请选择代理来源:'.cyan,
-      choices,
+      name: 'type',
+      message: '请选择代理来源:',
+      choices: Object.keys(PROXY_SOURCES).concat(['文件']),
     },
-  ]);
-
-  if (source === '自定义') {
-    const { filename } = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'filename',
-        message: '输入你的 proxy.txt 文件路径:'.cyan,
-        default: 'proxy.txt', // 默认文件名
+    {
+      type: 'input',
+      name: 'source',
+      message: '请输入代理来源 URL:',
+      when: (answers) => answers.type !== '文件',
+      validate: (input) => {
+        if (!input) {
+          return 'URL不能为空';
+        }
+        return true;
       },
-    ]);
-    return { type: 'file', source: filename };
-  }
+    },
+    {
+      type: 'input',
+      name: 'source',
+      message: '请输入代理文件路径:',
+      when: (answers) => answers.type === '文件',
+      validate: (input) => {
+        if (!input) {
+          return '文件路径不能为空';
+        }
+        return true;
+      },
+    },
+  ];
 
-  return { type: 'url', source: PROXY_SOURCES[source] }; // 返回URL来源
+  const answers = await inquirer.prompt(questions);
+  if (answers.type !== '文件') {
+    answers.source = PROXY_SOURCES[answers.type];
+  }
+  return answers;
 }
 
-module.exports = { retrieveProxies, loadLines, chooseProxySource }; // 导出函数
-
+module.exports = {
+  fetchProxies,
+  readLines,
+  selectProxySource,
+};
