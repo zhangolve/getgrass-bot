@@ -1,7 +1,7 @@
 {
   "name": "小草挂机bot",
-  "version": "2.0.0",
-  "description": "一个通过各种HTTP和SOCKS代理建立WebSocket连接的机器人，专门用于耕作Grass Airdrop第2季。",
+  "version": "2.0",
+  "description": "专用于挂机小草第2季。",
   "main": "index.js",
   "scripts": {
     "test": "echo \"错误：未指定测试\" && exit 1",
