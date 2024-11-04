@@ -19,7 +19,7 @@ const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function displayHeader() {
     process.stdout.write('\x1Bc');
     console.log(`${YELLOW}╔════════════════════════════════════════╗`);
-    console.log(`${YELLOW}║      🚀  小草第二季空投 🚀                 ║`);
+    console.log(`${YELLOW}║      🚀  小草第二季空投 🚀             ║`);
     console.log(`${YELLOW}║  👤    脚本编写：@qklxsqf              ║`);
     console.log(`${YELLOW}║  📢  电报频道：https://t.me/ksqxszq    ║`);
     console.log(`${YELLOW}╚════════════════════════════════════════╝`);
